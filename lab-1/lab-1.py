@@ -4,14 +4,14 @@
 # Метод Гаусса с выбором главного элемента по столбцам
 
 # Задачи:
-# • Вычисление определителя
-# • Вывод треугольной матрицы (включая преобразованный столбец В)
+# +++ Вычисление определителя
+# +++ Вывод треугольной матрицы (включая преобразованный столбец В)
 # • Вывод вектора неизвестных: 𝑥1, 𝑥2, … , 𝑥𝑛
-# • Вывод вектора невязок: 𝑟1, 𝑟, … , 𝑟n
+# +++ Вывод вектора невязок: 𝑟1, 𝑟, … , 𝑟n
 
 # Условия:
-#+++ Размерность матрицы n<=20
-#+++ Должна быть реализована возможность ввода коэффициентов матрицы, как с клавиатуры, так и из файла
+# +++ Размерность матрицы n<=20
+# +++ Должна быть реализована возможность ввода коэффициентов матрицы, как с клавиатуры, так и из файла
 from art import *
 import re
 import numpy as np
@@ -22,7 +22,7 @@ def log(*args):
 
 def get_matrix_size():
     while True:
-        matrix_size=input("Введите размер матрицы(колонка x строка, max - 20x20): ")
+        matrix_size=input("Введите размер матрицы(строка х колонка , max - 20x20): ")
         # log(f"Matrix size is {matrix_size}")
         
         regex_matrix_size=r"\b([1-9]|1\d|20)x([1-9]|1\d|20)\b"
@@ -192,6 +192,7 @@ def Gauss(matrix_with_free_members,x):
         matrix_max_row(matrix_with_free_members, k,h)
         for i in range(k + 1, n):
             div = matrix_with_free_members[i][k] / matrix_with_free_members[k][k]
+            # log(f" -1: {matrix_with_free_members[i][-1]}")
             matrix_with_free_members[i][-1] -= div * matrix_with_free_members[k][-1]
             for j in range(k, n):
                 matrix_with_free_members[i][j] -= div * matrix_with_free_members[k][j]
@@ -199,9 +200,7 @@ def Gauss(matrix_with_free_members,x):
         print("Матрица после преобразования: ")
         print_matrix(matrix_with_free_members)
         print("\n")
-    if is_singular(matrix_with_free_members):
-        print('Система имеет бесконечное число решений')
-        return
+        
     # Обратный ход
     for k in range(n - 1, -1, -1):
         x[k] = (matrix_with_free_members[k][-1] - sum([matrix_with_free_members[k][j] * x[j] for j in range(k + 1, n) ])) / matrix_with_free_members[k][k]
@@ -222,27 +221,20 @@ def Gauss_print(x, matrix_with_free_members,matrix):
     print("Определитель:", det)
     return x
  
-def is_singular(matrix):
-    for i in range(len(matrix)):
-        if not matrix[i][i]:
-            return True
-        return False
+
  
-def nevyazka(x,free_members,matrix):
-    temp = np.zeros((4, 1))
-    r = np.zeros((4, 1))
+def nevyazka(x,free_members,matrix,row):
+
+    result_row = np.zeros((row, 1))
+    r = np.zeros((row, 1))
     print('Вектор невязки:')
     for i in range(len(matrix)):
-        temp[i] = 0
+        result_row[i] = 0
         for j in range(len(matrix)):
-            temp[i] += x[j] * matrix[i][j]
-        r[i] = temp[i] - free_members[i]
-        print('r[', i + 1, '] =', "%.30f" % (r[i]), end = '\n')
+            result_row[i] += x[j] * matrix[i][j]
+        r[i] = result_row[i] - free_members[i]
+        print('r[', i + 1, '] =', "%.15f" % (r[i]), end = '\n')
 
-
-# TODO: 
-#       при вводе с файла предложить имена файлов
-#       проверить правильность векторов невязки(r1,r2...) 
 
 def main():
     tprint("Gauss   method\n(main element)")
@@ -254,20 +246,22 @@ def main():
                 free_members=get_free_members(row)
 
             if input_choice==0:
-                path=input("\nВведите путь к файлу: ")
+                path=input("\nВведите путь к файлу(test1.txt,...,test4.txt): ")
                 matrix,row,column,free_members=get_matrix_from_file(path)
                 
-            x= np.zeros((4, 1))
+            
             
             matrix_with_free_members= join_matrix_free_members(matrix,free_members,row,column)
             print("\nВаша матрица выглядит так: ")
             print_matrix(matrix_with_free_members)
             print()
-            x,matrix_with_free_members=Gauss(matrix_with_free_members,x)
+            x= np.zeros((row, 1))
+
+            Gauss(matrix_with_free_members,x)
             Gauss_print(x, matrix_with_free_members,matrix)
             print('')
 
-            nevyazka(x,free_members,matrix)
+            nevyazka(x,free_members,matrix,row)
             print('')
 
             del matrix, free_members, matrix_with_free_members
